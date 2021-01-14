@@ -1,7 +1,7 @@
 import Service from '@ember/service';
 import fetch from 'fetch';
 import { assign } from '@ember/polyfills';
-import { get, set } from '@ember/object';
+import { set } from '@ember/object';
 import { isEmpty } from '@ember/utils';
 import {
   InvalidError,
@@ -219,15 +219,15 @@ export default class FetchRequestService extends Service {
 
     const urlParts = [];
 
-    let host = options.host || get(this, 'host');
+    let host = options.host || this.host;
     if (host) {
       host = endsWithSlash(host) ? removeTrailingSlash(host) : host;
       urlParts.push(host);
     }
 
-    let namespace = options.namespace || get(this, 'namespace');
+    let namespace = options.namespace || this.namespace;
     if (namespace) {
-      // If host is given then we need to strip leading slash too( as it will be added through join)
+      // If host is given then we need to strip leading slash too (as it will be added through join)
       if (host) {
         namespace = stripSlashes(namespace);
       } else if (endsWithSlash(namespace)) {
@@ -253,7 +253,7 @@ export default class FetchRequestService extends Service {
 
   _shouldSendHeaders({ url, host }) {
     url = url || '';
-    host = host || get(this, 'host') || '';
+    host = host || this.host || '';
 
     // Add headers on relative URLs
     if (!isFullURL(url)) {
