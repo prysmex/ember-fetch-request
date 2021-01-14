@@ -1,10 +1,11 @@
 {
   "name": "ember-fetch-request",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Service for making Fetch requests in Ember applications.",
   "keywords": [
     "ember-addon",
     "fetch",
+    "ember-fetch",
     "ember-ajax"
   ],
   "repository": {
