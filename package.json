@@ -1,13 +1,18 @@
 {
   "name": "ember-fetch-request",
-  "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "version": "1.0.0",
+  "description": "Service for making Fetch requests in Ember applications.",
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "fetch",
+    "ember-ajax"
   ],
-  "repository": "",
+  "repository": {
+    "url": "git@github.com:prysmex/ember-fetch-request.git",
+    "type": "git"
+  },
   "license": "MIT",
-  "author": "",
+  "author": "grodriguez85",
   "directories": {
     "doc": "doc",
     "test": "tests"
