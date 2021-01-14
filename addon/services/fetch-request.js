@@ -84,11 +84,29 @@ function stripSlashes(path) {
 
 export default class FetchRequestService extends Service {
 
-  contentType = 'application/x-www-form-urlencoded; charset=UTF-8';
+  /**
+    The request can target other hosts by setting the `host` property.
+    @property host
+    @type {String}
+  */
 
-  host = undefined;
-  namespace = undefined;
-  headers = undefined;
+  /**
+    The request can target other hosts by setting the `host` property.
+    @property host
+    @type {String}
+  */
+
+  /**
+    The request can target another namespace by setting the `namespace` property.
+    @property namespace
+    @type {String}
+  */
+
+  /**
+    The request can merge custom/dynamic headers by setting the `headers` property.
+    @property headers
+    @type {Object}
+  */
 
   async request(endpoint, settings) {
     settings = this.options(endpoint, settings);
