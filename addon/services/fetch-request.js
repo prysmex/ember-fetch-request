@@ -117,11 +117,13 @@ export default class FetchRequestService extends Service {
       return new Promise(() => null);
     }
 
-    if (contentType.startsWith('application/json;')) {
+    // For application/json and application/vnd.api+json
+    if (contentType.includes('json')) {
       return await response.json();
     }
 
-    if (contentType.startsWith('text/plain;') || contentType.startsWith('text/html;')) {
+    // For text/plain and text/html
+    if (contentType.includes('text')) {
       return await response.text();
     }
 
