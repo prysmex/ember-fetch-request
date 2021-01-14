@@ -121,7 +121,7 @@ export default class FetchRequestService extends Service {
       return await response.json();
     }
 
-    if (contentType.startsWith('text/plain;')) {
+    if (contentType.startsWith('text/plain;') || contentType.startsWith('text/html;')) {
       return await response.text();
     }
 
