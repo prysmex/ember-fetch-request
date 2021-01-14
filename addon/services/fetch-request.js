@@ -128,7 +128,7 @@ export default class FetchRequestService extends Service {
     throw new Error(`Unsupported response content-type: ${contentType}`);
   }
 
-  async _handleErrors(response) {
+  _handleErrors(response) {
     switch (response.status) {
       case 422:
         throw new InvalidError();
