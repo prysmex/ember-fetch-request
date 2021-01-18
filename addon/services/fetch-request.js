@@ -125,7 +125,8 @@ export default class FetchRequestService extends Service {
 
       return payload;
     } catch(error) {
-      throw error(payload)
+      error.message = payload;
+      throw error;
     }
   }
 
