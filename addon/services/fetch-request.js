@@ -116,7 +116,7 @@ export default class FetchRequestService extends Service {
       throw new NetworkError(response);
     }
     
-    let payload = this.getBody(response);
+    let payload = await this.getBody(response);
 
     try {
       if (!response.ok) {
