@@ -1,7 +1,7 @@
 # ember-fetch-request
 
 Service for making Fetch requests in Ember applications.
-Mimics the ember-ajax magic over a plain ajax code. The way it builts the URL, works with the headers, handles errors, and provides a useful service.
+Mimics the ember-ajax magic. The way it builts the URL, works with the headers, handles errors, and provides a useful service.
 
 - customizable service
 - returns RSVP promises
@@ -10,10 +10,8 @@ Mimics the ember-ajax magic over a plain ajax code. The way it builts the URL, w
 
 ## Getting started
 
-If you're just starting out, you already have `ember-ajax` installed! However, if it's missing from your `package.json`, you can add it by doing:
-
 ```sh
-ember install ember-fetch-request
+ember install @prysmex-engineering/ember-fetch-request
 ```
 
 To use the fetch service, inject the `fetch-request` service into your route or component.

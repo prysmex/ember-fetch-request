@@ -1,1 +1,1 @@
-export { default } from 'ember-fetch-request/services/fetch-request';
+export { default } from '@prysmex-engineering/ember-fetch-request/services/fetch-request';
