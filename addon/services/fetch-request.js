@@ -115,17 +115,19 @@ export default class FetchRequestService extends Service {
     if (response.status === null || response.status === undefined) {
       throw new NetworkError(response);
     }
-    
-    let payload = await this.getBody(response);
 
     try {
       if (!response.ok) {
         this._handleErrors(response);
       }
 
-      return payload;
+      if (settings.returnRawResponse === true) {
+        return response;
+      } else {
+        return await this.getBody(response);
+      }
     } catch(error) {
-      error.message = payload;
+      error.message = await this.getBody(response);
       throw error;
     }
   }
