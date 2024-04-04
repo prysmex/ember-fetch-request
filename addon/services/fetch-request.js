@@ -135,7 +135,7 @@ export default class FetchRequestService extends Service {
   async getBody(response) {
     const contentType = response.headers.get('content-type');
     if (contentType === null) {
-      return new Promise(() => null);
+      return null;
     }
 
     // For application/json and application/vnd.api+json
