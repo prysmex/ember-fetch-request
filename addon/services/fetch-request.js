@@ -127,7 +127,7 @@ export default class FetchRequestService extends Service {
         return await this.getBody(response);
       }
     } catch(error) {
-      error.message = await this.getBody(response);
+      error.payload = await this.getBody(response);
       throw error;
     }
   }
