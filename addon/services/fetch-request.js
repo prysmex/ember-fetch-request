@@ -1,6 +1,5 @@
 import Service from '@ember/service';
 import fetch from 'fetch';
-import { assign } from '@ember/polyfills';
 import { set } from '@ember/object';
 import { isEmpty } from '@ember/utils';
 import {
@@ -272,7 +271,7 @@ export default class FetchRequestService extends Service {
      * the ones provided for the request
   */
   _getFullHeadersHash(headers = {}) {
-    return assign({}, this.headers, headers);
+    return Object.assign({}, this.headers, headers);
   }
 
 }
