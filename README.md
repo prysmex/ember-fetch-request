@@ -1,382 +1,154 @@
-# ember-fetch-request
+# @prysmex-engineering/ember-fetch-request
 
-Service for making Fetch requests in Ember applications.
-Mimics the ember-ajax magic. The way it builts the URL, works with the headers, handles errors, and provides a useful service.
+Service for making `fetch` requests in Ember applications. Mimics the
+`ember-ajax` ergonomics: it builds the request URL from the service's `host`
+and `namespace`, merges service-level and per-request headers, serializes
+JSON bodies and query parameters, and maps response statuses to typed error
+classes.
 
-- customizable service
-- returns RSVP promises
-- improved error handling
-- ability to specify request headers
+- Customizable service (subclass to set defaults)
+- Returns native Promises
+- Typed error classes for predictable error handling
+- TypeScript declarations published with the package
 
-## Getting started
+## Compatibility
+
+- Ember.js v4.0.0 or above
+- Embroider or `ember-auto-import` v2
+- Node.js 18 or above (for FastBoot / build tooling)
+
+## Installation
 
 ```sh
+pnpm add @prysmex-engineering/ember-fetch-request
+# or
+npm install @prysmex-engineering/ember-fetch-request
+# or
 ember install @prysmex-engineering/ember-fetch-request
 ```
 
-To use the fetch service, inject the `fetch-request` service into your route or component.
+## Usage
+
+Inject the `fetchRequest` service into a route, controller, or component.
 
 ```js
 import Route from '@ember/routing/route';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 
 export default class AnyRoute extends Route {
   @service fetchRequest;
+
   model() {
     return this.fetchRequest.request('/posts');
   }
 }
 ```
 
-## Fetch Request Service
+### Setting defaults
 
-//TODO: Translate ajax to fetch and update
+Extend the service to set a default `host`, `namespace`, or `headers`. The
+extended service is what gets injected when you `@service fetchRequest`.
 
-<!-- ### Basic Usage
+```js
+// app/services/fetch-request.js
+import FetchRequestService from '@prysmex-engineering/ember-fetch-request/services/fetch-request';
+import { service } from '@ember/service';
 
-The AJAX service provides methods to be used to make AJAX requests, similar to
-the way that you would use `jQuery.ajax`. In fact, `ember-ajax` is a wrapper
-around jQuery's method, and can be configured in much the same way.
+export default class AppFetchRequestService extends FetchRequestService {
+  @service session;
 
-In general, you will use the `request(url, options)` method, where `url` is the
-destination of the request and `options` is a configuration hash for
-[`jQuery.ajax`](http://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings).
+  host = 'https://api.example.com';
+  namespace = '/api/v1';
 
-```javascript
-import Ember from 'ember';
-
-export default Ember.Controller.extend({
-  ajax: Ember.inject.service(),
-  actions: {
-    sendRequest() {
-      return this.get('ajax').request('/posts', {
-        method: 'POST',
-        data: {
-          foo: 'bar'
-        }
-      });
+  get headers() {
+    const headers = {};
+    if (this.session.authToken) {
+      headers['Authorization'] = `Bearer ${this.session.authToken}`;
     }
+    return headers;
   }
+}
+```
+
+### Per-request options
+
+Pass options as the second argument to `request()`.
+
+```js
+this.fetchRequest.request('/posts', {
+  method: 'POST',
+  contentType: 'application/json',
+  body: { title: 'Hello' },
 });
 ```
 
-In this example, `this.get('ajax').request()` will return a promise with the
-result of the request. Your handler code inside `.then` or `.catch` will
-automatically be wrapped in an Ember run loop for maximum compatibility with
-Ember, right out of the box.
+Options accepted in addition to the standard `RequestInit` fields:
 
-### HTTP-verbed methods
-
-You can skip setting the `method` or `type` keys in your `options` object when
-calling `request(url, options)` by instead calling `post(url, options)`,
-`put(url, options)`, `patch(url, options)` or `del(url, options)`.
-
-```js
-post('/posts', { data: { title: 'Ember' } }); // Makes a POST request to /posts
-put('/posts/1', { data: { title: 'Ember' } }); // Makes a PUT request to /posts/1
-patch('/posts/1', { data: { title: 'Ember' } }); // Makes a PATCH request to /posts/1
-del('/posts/1'); // Makes a DELETE request to /posts/1
-```
-
-### Custom Request Headers
-
-`ember-ajax` allows you to specify headers to be used with a request. This is
-especially helpful when you have a session service that provides an auth token
-that you have to include with the requests to authorize your requests.
-
-To include custom headers to be used with your requests, you can specify
-`headers` hash on the `Ajax Service`.
-
-```js
-// app/services/ajax.js
-
-import Ember from 'ember';
-import AjaxService from 'ember-ajax/services/ajax';
-
-export default AjaxService.extend({
-  session: Ember.inject.service(),
-  headers: Ember.computed('session.authToken', {
-    get() {
-      let headers = {};
-      const authToken = this.get('session.authToken');
-      if (authToken) {
-        headers['auth-token'] = authToken;
-      }
-      return headers;
-    }
-  })
-});
-```
-
-Headers by default are only passed if the hosts match, or the request is a relative path.
-You can overwrite this behavior by either passing a host in with the request, setting the
-host for the ajax service, or by setting an array of `trustedHosts` that can be either
-an array of strings or regexes.
-
-```js
-// app/services/ajax.js
-
-import Ember from 'ember';
-import AjaxService from 'ember-ajax/services/ajax';
-
-export default AjaxService.extend({
-  trustedHosts: [/\.example\./, 'foo.bar.com']
-});
-```
-
-### Custom Endpoint Path
-
-The `namespace` property can be used to prefix requests with a specific url namespace.
-
-```js
-// app/services/ajax.js
-import Ember from 'ember';
-import AjaxService from 'ember-ajax/services/ajax';
-
-export default AjaxService.extend({
-  namespace: '/api/v1'
-});
-```
-
-`request('/users/me')` would now target `/api/v1/users/me`
-
-If you need to override the namespace for a custom request, use the `namespace` as an option to the request methods.
-
-```js
-// GET /api/legacy/users/me
-request('/users/me', { namespace: '/api/legacy' });
-```
-
-### Custom Host
-
-`ember-ajax` allows you to specify a host to be used with a request. This is
-especially helpful so you don't have to continually pass in the host along
-with the path, makes `request()` a bit cleaner.
-
-To include a custom host to be used with your requests, you can specify `host`
-property on the `Ajax Service`.
-
-```js
-// app/services/ajax.js
-
-import Ember from 'ember';
-import AjaxService from 'ember-ajax/services/ajax';
-
-export default AjaxService.extend({
-  host: 'http://api.example.com'
-});
-```
-
-That allows you to only have to make a call to `request()` as such:
-
-```js
-// GET http://api.example.com/users/me
-request('/users/me');
-```
-
-### Custom Content-Type
-
-`ember-ajax` allows you to specify a default [Content-Type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type) header to be used with a request.
-
-To include a custom Content-Type you can specify `contentType` property on the `Ajax Service`.
-
-```js
-// app/services/ajax.js
-
-import Ember from 'ember';
-import AjaxService from 'ember-ajax/services/ajax';
-
-export default AjaxService.extend({
-  contentType: 'application/json; charset=utf-8'
-});
-```
-
-You can also override the Content-Type per `request` with the `options` parameter.
-
-#### Customize isSuccess
-
-Some APIs respond with status code 200, even though an error has occurred and
-provide a status code in the payload. With the service, you can easily account
-for this behaviour by overwriting the `isSuccess` method.
-
-```js
-// app/services/ajax.js
-
-import AjaxService from 'ember-ajax/services/ajax';
-
-export default AjaxService.extend({
-  isSuccess(status, headers, payload) {
-    let isSuccess = this._super(...arguments);
-    if (isSuccess && payload.status) {
-      // when status === 200 and payload has status property,
-      // check that payload.status is also considered a success request
-      return this._super(payload.status);
-    }
-    return isSuccess;
-  }
-});
-```
+| Option              | Type                       | Description                                                                                  |
+| ------------------- | -------------------------- | -------------------------------------------------------------------------------------------- |
+| `host`              | `string`                   | Override the service-level host for this request.                                            |
+| `namespace`         | `string`                   | Override the service-level namespace for this request.                                       |
+| `headers`           | `Record<string, string>`   | Merged with the service-level `headers`.                                                     |
+| `contentType`       | `string`                   | Shortcut for setting `Content-Type` and triggering JSON body serialization.                  |
+| `body`              | `unknown`                  | Plain objects are JSON-stringified when the request is JSON; serialized as query on `GET`.   |
+| `returnRawResponse` | `boolean`                  | When `true`, returns the raw `Response` instead of the parsed body.                          |
 
 ### Error handling
 
-`ember-ajax` provides built in error classes that you can use to check the error
-that was returned by the response. This allows you to restrict determination of
-error result to the service instead of sprinkling it around your code.
-
-#### Built in error types
-
-`ember-ajax` has built-in error types that will be returned from the service in the event of an error:
-
-- `BadRequestError` (400)
-- `UnauthorizedError`(401)
-- `ForbiddenError`(403)
-- `NotFoundError` (404)
-- `InvalidError`(422)
-- `ServerError` (5XX)
-- `AbortError`
-- `TimeoutError`
-
-All of the above errors are subtypes of `AjaxError`.
-
-#### Error detection helpers
-
-`ember-ajax` comes with helper functions for matching response errors to their respective `ember-ajax` error type. Each of the errors listed above has a corresponding `is*` function (e.g., `isBadRequestError`).
-
-Use of these functions is **strongly encouraged** to help eliminate the need for boilerplate error detection code.
+Non-2xx responses throw a typed `FetchError` subclass with the response body
+attached as `error.payload`.
 
 ```js
-import Ember from 'ember';
 import {
-  isAjaxError,
   isNotFoundError,
-  isForbiddenError
-} from 'ember-ajax/errors';
+  isUnauthorizedError,
+} from '@prysmex-engineering/ember-fetch-request/errors';
 
-export default Ember.Route.extend({
-  ajax: Ember.inject.service(),
-  model() {
-    const ajax = this.get('ajax');
-
-    return ajax.request('/user/doesnotexist').catch(function(error) {
-      if (isNotFoundError(error)) {
-        // handle 404 errors here
-        return;
-      }
-
-      if (isForbiddenError(error)) {
-        // handle 403 errors here
-        return;
-      }
-
-      if (isAjaxError(error)) {
-        // handle all other AjaxErrors here
-        return;
-      }
-
-      // other errors are handled elsewhere
-      throw error;
-    });
+try {
+  return await this.fetchRequest.request('/posts/1');
+} catch (error) {
+  if (isNotFoundError(error)) {
+    // handle 404
+  } else if (isUnauthorizedError(error)) {
+    // handle 401
+  } else {
+    throw error;
   }
-});
-```
-
-If your errors aren't standard, the helper function for that error type can be used as the base to build your custom detection function.
-
-#### Access the response in case of error
-
-If you need to access the json response of a request that failed, you can use the `raw` method instead of `request`.
-
-```js
-this.get('ajax')
-  .raw(url, options)
-  .then(({ response }) => this.handleSuccess(response))
-  .catch(({ response, jqXHR, payload }) => this.handleError(response));
-```
-
-Note that in this use case there's no access to the error object. You can inspect the `jqXHR` object for additional information about the failed request. In particular `jqXHR.status` returns the relevant HTTP error code.
-
-## Usage with Ember Data
-
-Ember AJAX provides a mixin that can be used in an Ember Data Adapter to avoid the networking code provided by Ember Data and rely on Ember AJAX instead. This serves as a first step toward true integration of Ember AJAX into Ember Data.
-
-To use the mixin, you can include the mixin into an Adapter, like so:
-
-```javascript
-// app/adapters/application.js
-import DS from 'ember-data';
-import AjaxServiceSupport from 'ember-ajax/mixins/ajax-support';
-
-export default DS.JSONAPIAdapter.extend(AjaxServiceSupport);
-```
-
-That's all the configuration required! If you want to customize the adapter, such as using an alternative AJAX service (like one you extended yourself), hooks to do so are provided; check out the mixin's implementation for details.
-
-Note that instead of using the Ember Data error checking code in your application, you should use the ones provided by Ember AJAX.
-
-## Stand-Alone Usage
-
-If you aren't using Ember Data and do not have access to services, you
-can import the ajax utility like so:
-
-```js
-import request from 'ember-ajax/request';
-
-export default function someUtility(url) {
-  var options = {
-    // request options
-  };
-
-  return request(url, options).then(response => {
-    // `response` is the data from the server
-    return response;
-  });
 }
 ```
 
-Which will have the same API as the `ajax` service. If you want the raw jQuery XHR object
-then you can use the `raw` method instead:
+Available error classes: `FetchError`, `BadRequestError` (400),
+`UnauthorizedError` (401), `ForbiddenError` (403), `NotFoundError` (404),
+`ConflictError` (409), `GoneError` (410), `InvalidError` (422),
+`ServerError` (5xx), `NetworkError`, `TimeoutError`, `AbortError`.
 
-```js
-import raw from 'ember-ajax/raw';
+Each error has a matching `is*Error()` helper plus the catch-all
+`isFetchError()` and `isSuccess(status)`.
 
-export default function someOtherUtility(url) {
-  var options = {
-    // raw options
-  };
+## Migrating from v1.x
 
-  return raw(url, options).then(result => {
-    // `result` is an object containing `response` and `jqXHR`, among other items
-    return result;
-  });
-}
-```
+v2.0.0 reformats this addon as a [v2 Embroider addon][v2-format] with
+published TypeScript types.
 
-## Local Development
+[v2-format]: https://github.com/embroider-build/embroider/blob/main/docs/v2-faq.md
 
-This information is only relevant if you're looking to contribute to `ember-ajax`.
+Breaking changes:
 
-### Compatibility
+- Requires **Ember.js 4.0.0+** and **`ember-auto-import` v2** in the
+  consuming app. Apps still on Ember 3.x should stay on `1.x` of this addon.
+- The addon now ships pre-built JavaScript and `.d.ts` declarations in
+  `dist/` and `declarations/`. The classic `addon/` and `app/` trees are
+  gone, but the import paths consumers use remain unchanged.
+- The package now publishes its own TypeScript declarations, so apps with
+  `@types/...` shims for this package should remove them.
 
-- Node.js 6 or above
-- Ember CLI v2.13 or above
+No public API changes are expected. `fetchRequest.request(url, options)`,
+the error classes, and the `is*Error()` helpers all keep the same signatures.
 
-### Installation
+## Contributing
 
-- `git clone` this repository
-- `npm install`
+See the [Contributing](CONTRIBUTING.md) guide for development setup.
 
-### Running
+## License
 
-- `ember server`
-- Visit your app at http://localhost:4200.
-
-### Running Tests
-
-- `ember test`
-- `ember test --server`
-
-### Building
-
-- `ember build`
-
-For more information on using ember-cli, visit [http://www.ember-cli.com/](http://www.ember-cli.com/). -->
+This project is licensed under the [MIT License](LICENSE.md).
