@@ -2,25 +2,46 @@
 
 ## Installation
 
-* `git clone <repository-url>`
-* `cd ember-fetch-request`
-* `npm install`
+- `git clone <repository-url>`
+- `cd ember-fetch-request`
+- `pnpm install`
 
 ## Linting
 
-* `npm run lint:hbs`
-* `npm run lint:js`
-* `npm run lint:js -- --fix`
+- `pnpm lint`
+- `pnpm lint:fix`
+
+## Building the addon
+
+- `pnpm build`
 
 ## Running tests
 
-* `ember test` – Runs the test suite on the current Ember version
-* `ember test --server` – Runs the test suite in "watch mode"
-* `ember try:each` – Runs the test suite against multiple Ember versions
+- `pnpm test` – Builds the test bundle and runs it against headless Chrome.
 
-## Running the dummy application
+## Running the demo application
 
-* `ember serve`
-* Visit the dummy application at [http://localhost:4200](http://localhost:4200).
+- `pnpm start`
+- Visit the demo application at [http://localhost:4200](http://localhost:4200).
 
-For more information on using ember-cli, visit [https://ember-cli.com/](https://ember-cli.com/).
+## Testing against other Ember versions
+
+The repo uses [@embroider/try](https://github.com/embroider-build/embroider)
+for scenario testing. The scenarios are declared in [.try.mjs](./.try.mjs)
+and cover the supported peer range:
+
+- `ember-lts-4.12` – validates the minimum supported Ember version
+- `ember-lts-5.8`, `ember-lts-5.12` – mid-range LTS coverage
+- `ember-lts-6.2` – matches the day-to-day dev target
+- `ember-latest` – latest released Ember
+
+To run a single scenario locally:
+
+```sh
+pnpm dlx @embroider/try apply ember-lts-4.12
+pnpm install --no-lockfile
+pnpm test
+```
+
+For more information on Ember addon development, see the
+[Ember CLI Guides](https://cli.emberjs.com/release/).
