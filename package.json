@@ -122,9 +122,6 @@
   "ember-addon": {
     "version": 2,
     "type": "addon",
-    "main": "addon-main.cjs",
-    "app-js": {
-      "./services/fetch-request.js": "./dist/_app_/services/fetch-request.js"
-    }
+    "main": "addon-main.cjs"
   }
 }
