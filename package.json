@@ -1,6 +1,6 @@
 {
   "name": "@prysmex-engineering/ember-fetch-request",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Service for making Fetch requests in Ember applications.",
   "keywords": [
     "ember-addon",
