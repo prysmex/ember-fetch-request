@@ -1,0 +1,1 @@
+{"version":3,"file":"is-string.js","sources":["../../../src/-private/utils/is-string.ts"],"sourcesContent":["export default function isString(object: unknown): object is string {\n  return typeof object === 'string';\n}\n"],"names":["isString","object"],"mappings":"AAAe,SAASA,QAAQA,CAACC,MAAe,EAAoB;EAClE,OAAO,OAAOA,MAAM,KAAK,QAAQ;AACnC;;;;"}
