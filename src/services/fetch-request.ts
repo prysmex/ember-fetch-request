@@ -143,7 +143,7 @@ export default class FetchRequestService extends Service {
       return response.text();
     }
 
-    throw new Error(`Unsupported response content-type: ${contentType}`);
+    throw new Error(`Unsupported response content-type: ${contentType}, url: ${response.url}`);
   }
 
   _handleErrors(response: Response): never {
